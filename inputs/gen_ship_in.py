@@ -46,7 +46,7 @@ def make_example_ship_electric():
             "purchase_price": purchase_price,
             "type_energy": "BEV",
             "annual_distance_travel": annual_dist,
-            "consumption_energy": 54_164_540.0, # Total Annual kWh
+            "consumption_energy": 54_164_540.0, # Total Annual kWh  
             "crew_count": 20, 
             "crew_monthly_total": 0, 
             "maintenance_cost": 1_585_708.0, 
@@ -66,7 +66,7 @@ def make_example_ship_electric():
             "year_purchase": 2025,
             "current_year": 2040,  # 15 years later
             "travel_measure": 750_000.0,  # nautical miles
-            
+            "maintenance_cost": 1_585_708.0, 
             "minimum_fuel_consumption": 500.0,  # kWh/nm
             "powertrain_model_year": 2025,
             "warranty": 7.0,
@@ -82,7 +82,7 @@ def make_example_ship_electric():
 def make_example_ship_diesel():
     """
     Refined dictionary for a DIESEL SHIP (vessel).
-    Traditional diesel-powered cargo ship with CO2 tax considerations.
+    Traditional diesel-powered cargo (ro_pax_medium) ship with CO2 tax considerations.
     """
     purchase_price = 2_000_000.0
     operation_years = 15
@@ -121,12 +121,16 @@ def make_example_ship_diesel():
             "purchase_price": purchase_price,
             "type_energy": "DIESEL",
             "annual_distance_travel": annual_dist,
-            "crew_count": 8,
-            "maintenance_cost": 80_000.0, # Higher maintenance for internal combustion
-            "consumption_energy": 1_825_000.0, # Liters
+            "crew_count": 15,
+            "crew_monthly_total": 0, 
+            "maintenance_cost": 7_659_899, # Higher maintenance for internal combustion 15% of supposing total opex
+            "consumption_energy": 12_964_800.0, # supposing 74000 kwh per day by 0.04 euros per kwh
             "fuel_multiplier": 1.0,
             "EF_CO2_fuel": 2.65, # kg CO2 per liter
             "GT": 5000.0,
+            #"fuel_mass_kg": 5_174_000.0,
+            "days_in_port_per_year": 350.0,
+            "ship_class": "ro_pax_medium",
         },
 
         # ---------- RV ----------
@@ -138,8 +142,8 @@ def make_example_ship_diesel():
             "year_purchase": 2025,
             "current_year": 2040,
             "travel_measure": 900_000.0,
-            "maintenance_cost": 400_000.0,
-            "minimum_fuel_consumption": 800.0,
+            "maintenance_cost": 7_659_899,
+            "minimum_fuel_consumption": 800.0, #fix
             "powertrain_model_year": 2025,
             "warranty": 5.0,
             "type_warranty": 'year',
