@@ -295,7 +295,7 @@
           },
         "energy": {
           "energy_price_c_e": {
-            "DIESEL": 0.127,
+            "DIESEL": 0.045,
             "BIODIESEL": 0.165,
             "HVO": 0.182,
             "E_DIESEL": 0.360,

@@ -96,6 +96,9 @@ class ShipOPEXCalculator(System):
 
         vp = self.in_vehicle_properties
         return (vp.ship_class or "").strip().lower()
+    
+
+    
 
 
     # ==================== O_TAXES SHIP ====================
@@ -123,9 +126,11 @@ class ShipOPEXCalculator(System):
         if not isinstance(factors, (list, tuple)) or len(factors) < 3:
             self.o_taxes = 0.0
             return
+        
 
-        # Convert kg → ton
-        fuel_mass_ton = vp.fuel_mass_kg / 1000.0
+        
+        fuel_mass_ton = ((vp.annual_energy_consumption_kWh * 3.6 ) /43) /1000
+        
 
         f1, f2, f3 = factors
         summed = fuel_mass_ton * f1 + fuel_mass_ton * f2 + fuel_mass_ton * f3
