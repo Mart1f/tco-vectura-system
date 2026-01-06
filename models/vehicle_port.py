@@ -15,7 +15,7 @@ class VehiclePropertiesPort(Port):
         self.add_variable('registration_country', dtype=str, desc='Registration country of the vehicle', value='France')
         
         self.add_variable('travel_measure', dtype=float, desc='Total Distance (km) or hours (h)', value=0.0)
-        self.add_variable('maintenance_cost', dtype=float, desc='Total maintenance cost incurred', value=0.0)
+
         
         self.add_variable('minimum_fuel_consumption', dtype=float, desc='SFC (g/kWh)', value=250.0)
         self.add_variable('consumption_real', dtype=float, desc='Real consumption (kWh/km or kg/100km)', value=0.0)
@@ -65,9 +65,9 @@ class VehiclePropertiesPort(Port):
         self.add_variable("ship_class", dtype=str,
             desc=(
                 "Ship class key used in DB "
-                "(ro_pax_small, fishing_large, ctv_medium, ro_pax, small, medium, large, ctv...)"
+                "(ro_pax_small, ro_pax_medium, ro_pax_large, fishing_small, fishing_medium, fishing_large, ctv_small, ctv_medium, ctv_large)"
             ),
-            value="small"
+            value="big"
         )
         self.add_variable("length", dtype=float, desc="Ship length in meters", value=120.0)
         self.add_variable("safety_class", dtype=str, desc="Safety class", value="A")
@@ -84,23 +84,14 @@ class VehiclePropertiesPort(Port):
 
         # Crew
         self.add_variable(
-            "crew_list",
-            value=[
-                { "rank": "skipper",  "attribute": "ro_pax_large", "team_size": 1 },
-                { "rank": "deckhand", "attribute": "ro_pax_large", "team_size": 10 },
-                { "rank": "engineer", "attribute": "ro_pax_large", "team_size": 3 }
-            ],
-            desc="CREW: rank, attribute, team_size",
-            dtype=list
+            "crew_count",
+            value= 0.0,
+            desc="Amount of seafarer",
+            dtype=float
         )
 
         self.add_variable("planning_horizon_years", dtype=float, desc="Number of years N", value=1.0)
-        self.add_variable(
-            "maintenance_cost_annual",
-            dtype=float,
-            desc="Annual maintenance cost in EUR (legacy)",
-            value=100_000.0
-        )
+        
         
 
         # -------------------- DIGITAL TWIN / USER ENV (ORANGE) --------------------
@@ -122,6 +113,13 @@ class VehiclePropertiesPort(Port):
             dtype=float,
             desc="Annual energy consumption retrieved from digital twin (kWh)",
             value=5_000_000.0
+        )
+
+        self.add_variable(
+            "maintenance_cost_annual",
+            dtype=float,
+            desc="Annual maintenance cost per year in euros",
+            value= 1_244.0
         )
 
         # fuel mass: inward in kg, converted to ton in formulas

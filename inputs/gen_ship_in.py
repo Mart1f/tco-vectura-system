@@ -9,11 +9,11 @@ def make_example_ship_electric():
     
     return {
         "asset_type": "ship",
-        "description": "Electric Ferry - Battery Electric with shore charging",
+        "description": "Electric Ferry (ro_pax, large) - Battery Electric with shore charging",
 
         # Common data
         "powertrain_type": "BEV",
-        "vehicle_weight_class": "large",
+        "vehicle_weight_class": "large", #large,medium,small
         "country": "France",
         "year": 2025,
         "operation_years": operation_years,
@@ -46,12 +46,14 @@ def make_example_ship_electric():
             "purchase_price": purchase_price,
             "type_energy": "BEV",
             "annual_distance_travel": annual_dist,
-            "consumption_energy": 2_500_000.0, # Total Annual kWh
-            "crew_count": 12,
-            "maintenance_cost": 45_000.0, # Annual estimated
+            "consumption_energy": 54_164_540.0, # Total Annual kWh
+            "crew_count": 20, 
+            "crew_monthly_total": 0, 
+            "maintenance_cost": 1_585_708.0, 
             "fuel_multiplier": 1.0,
             "EF_CO2_fuel": 0.0, # Zero direct emissions
-            "GT": 500.0,
+            "ship_class": "ro_pax_large",
+            "GT":  11_000.0, #size vehicle
         },
 
         # ---------- RV ----------
@@ -59,18 +61,18 @@ def make_example_ship_electric():
             "type_vehicle": "ship",
             "type_energy": "BEV",
             "registration_country": "France",
-            "purchase_cost": 3_500_000.0,
+            "purchase_cost": purchase_price,
             "year_purchase": 2025,
             "current_year": 2040,  # 15 years later
             "travel_measure": 750_000.0,  # nautical miles
-            "maintenance_cost": 250_000.0,
+            
             "minimum_fuel_consumption": 500.0,  # kWh/nm
             "powertrain_model_year": 2025,
             "warranty": 7.0,
             "type_warranty": 'year',
-            "energy_price": 0.45,  # €/kWh for shore power
+            "energy_price": 0.15,  # €/kWh for shore power
             "co2_taxes": 0.0,
-            "subsidies": 350_000.0,  # Government subsidy for green shipping
+            "subsidies": 0.0, 
             "vehicle_number": 1,
         },
     }
@@ -131,7 +133,7 @@ def make_example_ship_diesel():
             "type_vehicle": "ship",
             "type_energy": "DIESEL",
             "registration_country": "France",
-            "purchase_cost": 2_000_000.0,
+            "purchase_cost": purchase_price,
             "year_purchase": 2025,
             "current_year": 2040,
             "travel_measure": 900_000.0,

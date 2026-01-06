@@ -32,11 +32,6 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # SHIP PART  (Logic preserved)
 # =============================================================================
 
-SHIP_CLASS_TO_DB_KEY = {
-    "large": "ro_pax_large",
-    "big": "ro_pax_large",
-    "cargo_large": "ro_pax_large",
-}
 
 class ShipOPEXCalculator(System):
     """CosApp System for ship OPEX."""
@@ -54,7 +49,12 @@ class ShipOPEXCalculator(System):
             {c["country"]: c for c in db_data["countries"]},
         )
 
-        # -------------------- PORTS --------------------
+        # --------------------- INPUTS ANOTHER FUNCIONS ---------------
+
+        self.add_inward("in_residual_value",0.0,desc="Residual value coming from RV system")
+        
+
+        # -------------------- MODEL --------------------
         self.add_input(VehiclePropertiesPort, 'in_vehicle_properties')
         self.add_input(CountryPropertiesPort, 'in_country_properties')
 
@@ -88,10 +88,15 @@ class ShipOPEXCalculator(System):
             return country_db[category]
 
         raise ValueError(f"Category '{category}' not found for country '{country}'")
+    
+    #take the value from class ship
 
-    def _map_ship_class_to_db_key(self, ship_class: str) -> str:
-        
-        return SHIP_CLASS_TO_DB_KEY.get(ship_class, ship_class)
+    def _ship_class_db_key(self) -> str: 
+        """Return ship_class formatted as DB key (safe normalization)."""
+
+        vp = self.in_vehicle_properties
+        return (vp.ship_class or "").strip().lower()
+
 
     # ==================== O_TAXES SHIP ====================
 
@@ -101,7 +106,7 @@ class ShipOPEXCalculator(System):
         tax_energy = taxes_opex["tax_energy_c_e"]
         co2_price = tax_energy["co2_price"]
 
-        class_key = self._map_ship_class_to_db_key(vp.ship_class)
+        class_key = self._ship_class_db_key()
         energy_key = vp.type_energy
 
         if class_key not in tax_energy:
@@ -132,7 +137,7 @@ class ShipOPEXCalculator(System):
         vp = self.in_vehicle_properties
         ports_db = self.get_db_params(vp.country_oper, "ports")
 
-        class_key = self._map_ship_class_to_db_key(vp.ship_class)
+        class_key = self._ship_class_db_key()
         if class_key not in ports_db:
             self.o_ports = 0.0
             return
@@ -151,22 +156,20 @@ class ShipOPEXCalculator(System):
 
     def compute_o_insurance_ship(self):
         vp = self.in_vehicle_properties
+
         insurance_db = self.get_db_params(vp.registration_country, "insurance")
+        insurance_per_type = insurance_db["insurance_per_type"]
 
-        class_key = self._map_ship_class_to_db_key(vp.ship_class)
-        energy_key = vp.type_energy
+        class_key = self._ship_class_db_key()
 
-        insurance_rate = 0.0
+        insurance_rate = insurance_per_type[class_key]
 
-        per_type = insurance_db.get("insurance_per_type")
-        if isinstance(per_type, dict) and class_key in per_type:
-            insurance_rate = per_type[class_key]
-        else:
-            per_energy = insurance_db.get("insurance_per_energy", {})
-            insurance_rate = per_energy.get(energy_key, 0.0)
+        RV_ship = self.in_residual_value  
 
-        RV_ship = 0.0 
-        self.o_insurance = insurance_rate * (vp.purchase_cost - RV_ship)
+        
+
+        self.o_insurance = (insurance_rate * (vp.purchase_cost - RV_ship))*12
+
 
     # ==================== O_CREW SHIP ====================
 
@@ -177,13 +180,12 @@ class ShipOPEXCalculator(System):
         wages = crew_db["wage_of_crew_rank"]
         seafarer_wage = wages.get("seafarer", 0.0)
 
-        if cp.crew_monthly_total and cp.crew_monthly_total > 0:
+        if cp.crew_monthly_total > 0:
+            
             annual_cost = cp.crew_monthly_total * 12.0
+
         else:
-            total_crew = 0
-            for member in vp.crew_list:
-                total_crew += member.get("team_size", 0)
-            annual_cost = seafarer_wage * total_crew
+            annual_cost = vp.crew_count * seafarer_wage
 
         self.o_crew = annual_cost
 
@@ -191,20 +193,9 @@ class ShipOPEXCalculator(System):
 
     def compute_o_maintenance_ship(self):
         vp = self.in_vehicle_properties
-        maintenance_db = self.get_db_params(vp.country_oper, "maintenance")
-
-        class_key = self._map_ship_class_to_db_key(vp.ship_class)
-        maintenance_rate = maintenance_db.get(class_key, 0.0)
-
-        base_sum = (
-            self.o_taxes
-            + self.o_ports
-            + self.o_insurance
-            + self.o_crew
-            + self.o_energy
-        )
-
-        self.o_maintenance = base_sum * maintenance_rate
+        maintenance = vp.maintenance_cost_annual
+        
+        self.o_maintenance = maintenance*1
 
     # ==================== O_ENERGY SHIP ====================
 
@@ -251,7 +242,7 @@ class ShipOPEXCalculator(System):
             "n_trips_per_year": vp.n_trips_per_year,
             "days_per_trip": vp.days_per_trip,
             "planning_horizon_years": vp.planning_horizon_years,
-            "maintenance_cost_annual": vp.maintenance_cost_annual,
+            "maintenance_cost": vp.maintenance_cost,
             "crew_monthly_total": cp.crew_monthly_total,
             "crew_list": vp.crew_list,
             "I_energy": vp.I_energy,
@@ -273,7 +264,7 @@ class ShipOPEXCalculator(System):
 
 
 # =============================================================================
-# TRUCK PART - REVISED & CORRECTED
+# TRUCK PART -
 # =============================================================================
 
 class TruckOPEXCalculator(System):
@@ -433,6 +424,8 @@ class TruckOPEXCalculator(System):
 
         self.o_energy = vp.consumption_energy * energy_price
 
+       
+
     # ==================== MAIN COMPUTE ====================
 
     def compute(self):
@@ -448,7 +441,7 @@ class TruckOPEXCalculator(System):
             + self.o_insurance
             + self.o_crew
             + self.o_energy
-            + self.in_vehicle_properties.maintenance_cost_annual
+            + self.in_vehicle_properties.maintenance_cost
         )
 
     def print_results(self):
@@ -467,7 +460,7 @@ class TruckOPEXCalculator(System):
         print(f"→ TOTAL O_INSURANCE: {self.o_insurance:.2f} EUR")
         print(f"→ TOTAL O_CREW: {self.o_crew:.2f} EUR")
         print(f"→ TOTAL O_ENERGY: {self.o_energy:.2f} EUR")
-        print(f"→ Annual Maintenance: {vp.maintenance_cost_annual:.2f} EUR")
+        print(f"→ Annual Maintenance: {vp.maintenance_cost:.2f} EUR")
         print("\n" + "=" * 80)
         print(f"TOTAL OPEX: {self.o_opex_total:.2f} EUR")
         print("=" * 80 + "\n")

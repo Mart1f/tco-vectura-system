@@ -139,39 +139,58 @@ def run_opex_truck(opex_inputs: dict) -> float:
     return sys_opex.o_opex_total
 
 
-def run_opex_ship(opex_inputs: dict) -> float:
+def run_opex_ship(opex_inputs: dict, rv_value: float) -> float:
     print("\n" + "="*80)
     print("RUNNING SHIP OPEX CALCULATION")
     print("="*80)
-    
+
     sys_ship = ShipOPEXCalculator("ship_opex_case")
     vp = sys_ship.in_vehicle_properties
-    
-    # --- CONSOLIDATED & TYPE-SAFE MAPPING ---
-    # 1. Mandatory Floats (Must use float() to avoid TypeError)
+    cp = sys_ship.in_country_properties
+
+
+    # 1) Set OPEX inputs
+  
     vp.purchase_cost = float(opex_inputs.get("purchase_price", 0.0))
     vp.GT = float(opex_inputs.get("GT", 0.0))
     vp.annual_energy_consumption_kWh = float(opex_inputs.get("consumption_energy", 0.0))
+    vp.maintenance_cost_annual = float(opex_inputs.get("maintenance_cost", 0.0))
+    vp.crew_count = float(opex_inputs.get("crew_count", 0.0))
+    cp.crew_monthly_total = float(opex_inputs.get("crew_monthly_total", 0.0))
     vp.fuel_mass_kg = float(opex_inputs.get("fuel_mass_kg", 0.0))
-    
-    # 2. Mandatory Strings
-    vp.ship_class = str(opex_inputs.get("size_vehicle", "large")) 
+
+    vp.ship_class = str(opex_inputs.get("ship_class", "fishing_small"))  # ojo: usa ship_class, no size_vehicle
     vp.registration_country = str(opex_inputs.get("registration_country", "France"))
-    vp.country_oper = str(opex_inputs.get("registration_country", "France"))
+    vp.country_oper = str(opex_inputs.get("country_oper", vp.registration_country))
     vp.type_energy = str(opex_inputs.get("type_energy", "DIESEL"))
+
     
-    # 3. List Structures
-    # Ensure team_size is an int (CosApp lists usually expect specific types)
-    crew_size = int(opex_inputs.get("crew_count", 0))
-    vp.crew_list = [{"rank": "seafarer", "team_size": crew_size}]
+    # 2) Compute RV 
     
-    # --- EXECUTION ---
+    rv_sys = ResidualValueCalculator("rv_for_opex", type_vehicle="ship")
+    rvp = rv_sys.in_vehicle_properties
+    rcp = rv_sys.in_country_properties
+
+   
+    rvp.type_energy = vp.type_energy
+    rvp.registration_country = vp.registration_country
+    rvp.purchase_cost = vp.purchase_cost
+    rvp.vehicle_number = getattr(vp, "vehicle_number", 1)
+
+
+    rv_sys.add_driver(RunOnce("run_rv_for_opex"))
+    rv_sys.run_drivers()
+
+    # 3) Inject RV into OPEX
+    sys_ship.in_residual_value = float(rv_value)
+
+    # 4) Run OPEX
     sys_ship.add_driver(RunOnce("run_ship"))
     sys_ship.run_drivers()
-    
-    # --- RESULTS DISPLAY ---
+
+    # Print
     print("\n" + "-"*80)
-    print("SHIP OPEX BREAKDOWN")
+    print("SHIP OPEX BREAKDOWN ANNUAL")
     print("-"*80)
     print(f"Taxes:           €{sys_ship.o_taxes:>15,.2f}")
     print(f"Port Fees:       €{sys_ship.o_ports:>15,.2f}")
@@ -182,8 +201,9 @@ def run_opex_ship(opex_inputs: dict) -> float:
     print("-"*80)
     print(f"OPEX Total:      €{sys_ship.o_opex_total:>15,.2f}")
     print("="*80)
-    
+
     return float(sys_ship.o_opex_total)
+
 
 
 def run_rv(rv_inputs: dict) -> float:
@@ -210,7 +230,7 @@ def run_rv(rv_inputs: dict) -> float:
     rv_sys.in_vehicle_properties.year_purchase = rv_inputs["year_purchase"]
     rv_sys.in_vehicle_properties.current_year = rv_inputs["current_year"]
     rv_sys.in_vehicle_properties.travel_measure = rv_inputs["travel_measure"]
-    rv_sys.in_vehicle_properties.maintenance_cost = rv_inputs["maintenance_cost"]
+    
     rv_sys.in_vehicle_properties.minimum_fuel_consumption = rv_inputs["minimum_fuel_consumption"]
     rv_sys.in_vehicle_properties.powertrain_model_year = rv_inputs["powertrain_model_year"]
     rv_sys.in_vehicle_properties.warranty = rv_inputs["warranty"]
@@ -282,17 +302,18 @@ def run_tco_scenario(user_inputs: dict):
     # 1) CAPEX
     capex_inputs = dict(user_inputs)
     capex_total = run_capex(capex_inputs, asset_type)
+
+    # 2) Residual Value
+    rv_value = run_rv(user_inputs["rv"])
     
-    # 2) OPEX
+    # 3) OPEX
     if asset_type == "truck":
         opex_annual = run_opex_truck(user_inputs["opex_truck"])
     elif asset_type == "ship":
-        opex_annual = run_opex_ship(user_inputs["opex_ship"])
+        opex_annual = run_opex_ship(user_inputs["opex_ship"], rv_value)
     else:
         raise ValueError(f"Unknown asset_type: {asset_type}")
     
-    # 3) Residual Value
-    rv_value = run_rv(user_inputs["rv"])
     
     # 4) Get parameters for TCO calculation
     N = user_inputs["operation_years"]
@@ -425,9 +446,9 @@ if __name__ == "__main__":
     
    
     # Run TCO calculation
-    results = run_tco_scenario(scenario_inputs_truck_elec)
+    #results = run_tco_scenario(scenario_inputs_truck_elec)
     #results = run_tco_scenario(scenario_inputs_truck_diesel)
-    #results = run_tco_scenario(scenario_inputs_ship_elec)       
+    results = run_tco_scenario(scenario_inputs_ship_elec)       
     #results = run_tco_scenario(scenario_inputs_ship_diesel)
     
     print("\n" + "#"*80)
