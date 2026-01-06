@@ -150,7 +150,7 @@ class ShipOPEXCalculator(System):
         for p, d in zip(params, discounts):
             base_factor += p * d
 
-        self.o_ports = base_factor * vp.GT
+        self.o_ports = (base_factor * vp.GT) *vp.days_in_port #supposing a 350 working days
 
     # ==================== O_INSURANCE SHIP ====================
 

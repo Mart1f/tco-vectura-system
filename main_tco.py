@@ -158,6 +158,7 @@ def run_opex_ship(opex_inputs: dict, rv_value: float) -> float:
     vp.crew_count = float(opex_inputs.get("crew_count", 0.0))
     cp.crew_monthly_total = float(opex_inputs.get("crew_monthly_total", 0.0))
     vp.fuel_mass_kg = float(opex_inputs.get("fuel_mass_kg", 0.0))
+    vp.days_in_port = float(opex_inputs.get("days_in_port_per_year", 0.0))    
 
     vp.ship_class = str(opex_inputs.get("ship_class", "fishing_small"))  # ojo: usa ship_class, no size_vehicle
     vp.registration_country = str(opex_inputs.get("registration_country", "France"))

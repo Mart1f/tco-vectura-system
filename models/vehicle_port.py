@@ -96,6 +96,7 @@ class VehiclePropertiesPort(Port):
 
         # -------------------- DIGITAL TWIN / USER ENV (ORANGE) --------------------
         self.add_variable("I_energy", dtype=float, desc="Energy consumption per km (MWh/km or ton/km)", value=0.5)
+        self.add_variable("days_in_port", dtype=float, desc="Number of days arriving or departing from a port", value=0.5)
         self.add_variable(
             "EF_CO2",
             dtype=float,

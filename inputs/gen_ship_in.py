@@ -53,7 +53,8 @@ def make_example_ship_electric():
             "fuel_multiplier": 1.0,
             "EF_CO2_fuel": 0.0, # Zero direct emissions
             "ship_class": "ro_pax_large",
-            "GT":  11_000.0, #size vehicle
+            "GT":  11_000.0, #gross tonnage
+            "days_in_port_per_year": 350.0,
         },
 
         # ---------- RV ----------
