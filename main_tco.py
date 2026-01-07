@@ -244,9 +244,9 @@ def run_rv(rv_inputs: dict) -> float:
     print(f"Purchase Cost: €{rv_inputs['purchase_cost']:,.2f}")
     
     # Country properties
-    rv_sys.in_country_properties.energy_price = rv_inputs["energy_price"]
-    rv_sys.in_country_properties.c02_taxes = rv_inputs["co2_taxes"]
-    rv_sys.in_country_properties.subsidies = rv_inputs["subsidies"]
+    # rv_sys.in_country_properties.energy_price = rv_inputs["energy_price"]
+    # # rv_sys.in_country_properties.co2_taxes = rv_inputs["co2_taxes"]
+    # rv_sys.in_country_properties.subsidies = rv_inputs["subsidies"]
     
     rv_sys.add_driver(RunOnce('run_rv'))
     rv_sys.run_drivers()
@@ -448,9 +448,9 @@ if __name__ == "__main__":
    
     # Run TCO calculation
     #results = run_tco_scenario(scenario_inputs_truck_elec)
-    #results = run_tco_scenario(scenario_inputs_truck_diesel)
+    results = run_tco_scenario(scenario_inputs_truck_diesel)
     #results = run_tco_scenario(scenario_inputs_ship_elec)       
-    results = run_tco_scenario(scenario_inputs_ship_diesel)
+    # results = run_tco_scenario(scenario_inputs_ship_diesel)
     
     print("\n" + "#"*80)
     print("# TCO CALCULATION COMPLETED")

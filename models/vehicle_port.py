@@ -10,12 +10,12 @@ class VehiclePropertiesPort(Port):
         # -------------------- USER INPUTS --------------------
         # Common inputs
         self.add_variable('type_vehicle', dtype=str, desc='Vehicle type: Truck or Ship', value='truck')
-        self.add_variable('type_energy', dtype=str, desc='Energy type: diesel, electric, hybrid, hydrogen_fuel_cell, hydrogen_h2, cng, lng', value='DIESEL')
+        self.add_variable('type_energy', dtype=str, desc='Energy type: diesel, electric, hybrid, hydrogen_fuel_cell, hydrogen_h2, cng, lng (Final Energy)', value='DIESEL')
         self.add_variable('purchase_cost', dtype=float, desc='Initial purchase cost', value=0.0)
         self.add_variable('registration_country', dtype=str, desc='Registration country of the vehicle', value='France')
         
         self.add_variable('travel_measure', dtype=float, desc='Total Distance (km) or hours (h)', value=0.0)
-
+        self.add_variable('maintenance_cost', dtype=float, desc='Total maintenance cost incurred', value=0.0)
         
         self.add_variable('minimum_fuel_consumption', dtype=float, desc='SFC (g/kWh)', value=250.0)
         self.add_variable('consumption_real', dtype=float, desc='Real consumption (kWh/km or kg/100km)', value=0.0)
@@ -35,7 +35,7 @@ class VehiclePropertiesPort(Port):
         self.add_variable('type_warranty', dtype=str, desc='Type of warranty: years or km', value='years')
         self.add_variable('year_purchase', dtype=int, desc='Year of purchase', value=2020)
         
-        self.add_variable('current_year', dtype=int, desc='Current year', value=datetime.now().year)
+        self.add_variable('current_year', dtype=int, desc='Final years', value=datetime.now().year)
         self.add_variable('vehicle_number', dtype=int, desc='Numbers of vehicle', value=1)
 
         # CAPEX INPUTS
