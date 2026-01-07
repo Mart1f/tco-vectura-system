@@ -55,6 +55,13 @@ class ResidualValueCalculator(System):
         self.add_outward('total_external_factors', 0.0, desc='Total external factors adjustment')
         self.add_outward('rv', 0.0, desc='Final Residual Value')
 
+        # === SOLUCIÓN ERROR ATTRIBUTE ===
+        # Definimos estas variables aquí para asegurar que existen, 
+        # incluso si el cálculo de depreciación falla por falta de datos.
+        self.add_outward('dep_per_year', 0.0, desc='Depreciation per year')
+        self.add_outward('dep_by_usage', 0.0, desc='Depreciation by usage')
+        self.add_outward('dep_maintenance', 0.0, desc='Depreciation by maintenance')
+
 
     # COMPUTE METHODS FOR RV CALCULATION
 
@@ -69,10 +76,10 @@ class ResidualValueCalculator(System):
         type_energy = vp.type_energy
         country = vp.registration_country
         number_of_vehicles = vp.vehicle_number
-
-        # Depreciation components
         purchase_cost = vp.purchase_cost
-        vehicle_age = vp.current_year - vp.year_purchase    
+        vehicle_age = vp.current_year - vp.year_purchase
+        travel_measure  = vp.travel_measure
+        maintenance_cost = vp.maintenance_cost    
 
         # Parameters of database
         rate_per_year = self._countries_data[country]["depreciation"]["depreciation_rate_per_year"][type_energy]
@@ -80,13 +87,13 @@ class ResidualValueCalculator(System):
         rate_by_usage = r_usage
         coef_maintenance = self._countries_data[country]["depreciation"]["coef_depreciation_maintenance"][type_energy]
 
-        dep_per_year = rate_per_year * vehicle_age
-        dep_by_usage = rate_by_usage * vp.travel_measure
-        dep_maintenance = coef_maintenance * vp.maintenance_cost
+        self.dep_per_year = purchase_cost * rate_per_year * vehicle_age
+        self.dep_by_usage = purchase_cost * rate_by_usage * travel_measure
+        self.dep_maintenance = coef_maintenance * maintenance_cost
 
 
         # Total depreciation
-        self.total_depreciation = purchase_cost - (dep_per_year + dep_by_usage + dep_maintenance)
+        self.total_depreciation = purchase_cost - (self.dep_per_year + self.dep_by_usage + self.dep_maintenance)
         self.total_depreciation = self.total_depreciation*number_of_vehicles
 
     # 2.1.- PENALIZATION OF EFICIENCY
@@ -104,15 +111,13 @@ class ResidualValueCalculator(System):
             n_f = 3600/(minimum_fuel_consumption * heating_value)
         
         elif type_energy in ["BEV", "FCEV"]:
-            # Electric/Fuel Cell: η_sys = consumption_benchmark / consumption_real
+            # Electric/Fuel Cell: η_sys = battery_capacity/autonomy / consumption_real
             consumption_real = vp.consumption_real
             battery_capacity = vp.C_bat_kwh
             autonomy = vp.autonomy
 
-            consumption_benchmark = battery_capacity/autonomy
-
             if consumption_real>0:
-                n_f = consumption_benchmark / consumption_real
+                n_f = (battery_capacity/autonomy) / consumption_real
             else:
                 n_f = 0.85
         
@@ -131,11 +136,9 @@ class ResidualValueCalculator(System):
             consumption_real = vp.consumption_real
             battery_capacity = vp.C_bat_kwh
             autonomy = vp.autonomy
-
-            consumption_benchmark = battery_capacity/autonomy
-
+            
             if consumption_real>0:
-                n_ev = consumption_benchmark / consumption_real
+                n_ev = (battery_capacity/autonomy) / consumption_real
             else:
                 n_ev = 0.85
 
@@ -254,9 +257,9 @@ class ResidualValueCalculator(System):
         # Inputs
         cp = self.in_country_properties
         vp = self.in_vehicle_properties
-        energy_price = cp.energy_price
-        c02_taxes = cp.c02_taxes
-        subsidies = cp.subsidies
+        # energy_price = cp.energy_price
+        # co2_taxes = cp.co2_taxes
+        # subsidies = cp.subsidies
         type_energy = vp.type_energy
         country = vp.registration_country
         number_of_vehicles = vp.vehicle_number
@@ -267,8 +270,14 @@ class ResidualValueCalculator(System):
         cO2_taxes_factor = self._countries_data[country]["external_factors"]["CO2_taxes_factor"]
         subsidies_factor = self._countries_data[country]["external_factors"]["subsidies_factor"][type_energy]
 
+        energy_price = self._countries_data[country]["energy"]["energy_price_c_e"][type_energy]
+        co2_taxes = self._countries_data[country]["tax_CO2_c_e"]
+        subsidies = self._countries_data[country]["subsidies"]["2025"]["medium"]["vehicle_subsidies"][type_energy]
+
+
+
         # Total external_factors
-        self.total_external_factors = energy_price_factor*energy_price+ c02_taxes*cO2_taxes_factor + subsidies*subsidies_factor
+        self.total_external_factors = energy_price_factor*energy_price+ co2_taxes*cO2_taxes_factor + subsidies*subsidies_factor
         self.total_external_factors = self.total_external_factors*number_of_vehicles
 
     # 4.- RV
@@ -279,5 +288,19 @@ class ResidualValueCalculator(System):
             self.compute_external_factors()
 
             self.rv = (self.total_depreciation/ self.total_impact_health+self.total_external_factors)
+            print(f"RV computed: €{self.rv:,.2f}")
+            print(f" - Total Depreciation: €{self.total_depreciation:,.2f}")
+            print(f" ---- Depreciation per Year: €{self.dep_per_year:,.2f}")
+            print(f" ---- Depreciation by Usage: €{self.dep_by_usage:,.2f}")
+            print(f" ---- Depreciation Maintenance: €{self.dep_maintenance:,.2f}")
+
+            print(f" - Total Impact Health Penalty: €{self.total_impact_health:,.2f}")
+            print(f"   ---- Efficiency Penalty: {self.efficiency_penalty:,.2f} %")
+            print(f"   ---- Obsolescence Penalty: {self.obsolescence_penalty:,.2f} %")
+            print(f"   ---- Charging Penalty: {self.charging_penalty:,.2f} %")
+            print(f"   ---- Warranty Penalty: {self.warranty_penalty:,.2f} %")
+
+            print(f" - Total External Factors Adjustment: €{self.total_external_factors:,.2f}")
+            print()
         except Exception as e:
             print(f"ERROR in RV compute: {e}")

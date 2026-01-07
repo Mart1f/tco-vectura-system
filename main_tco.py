@@ -236,6 +236,7 @@ def run_rv(rv_inputs: dict) -> float:
     rv_sys.in_vehicle_properties.powertrain_model_year = rv_inputs["powertrain_model_year"]
     rv_sys.in_vehicle_properties.warranty = rv_inputs["warranty"]
     rv_sys.in_vehicle_properties.type_warranty = rv_inputs["type_warranty"]
+    rv_sys.in_vehicle_properties.maintenance_cost = rv_inputs["maintenance_cost"]
     
     print(f"Vehicle Type: {rv_inputs['type_vehicle']}")
     print(f"Energy Type: {rv_inputs['type_energy']}")
@@ -244,9 +245,9 @@ def run_rv(rv_inputs: dict) -> float:
     print(f"Purchase Cost: €{rv_inputs['purchase_cost']:,.2f}")
     
     # Country properties
-    rv_sys.in_country_properties.energy_price = rv_inputs["energy_price"]
-    rv_sys.in_country_properties.c02_taxes = rv_inputs["co2_taxes"]
-    rv_sys.in_country_properties.subsidies = rv_inputs["subsidies"]
+    # rv_sys.in_country_properties.energy_price = rv_inputs["energy_price"]
+    # # rv_sys.in_country_properties.co2_taxes = rv_inputs["co2_taxes"]
+    # rv_sys.in_country_properties.subsidies = rv_inputs["subsidies"]
     
     rv_sys.add_driver(RunOnce('run_rv'))
     rv_sys.run_drivers()
@@ -448,9 +449,15 @@ if __name__ == "__main__":
    
     # Run TCO calculation
     #results = run_tco_scenario(scenario_inputs_truck_elec)
+<<<<<<< HEAD
     #results = run_tco_scenario(scenario_inputs_truck_diesel)
     results = run_tco_scenario(scenario_inputs_ship_elec)       
     #results = run_tco_scenario(scenario_inputs_ship_diesel)
+=======
+    results = run_tco_scenario(scenario_inputs_truck_diesel)
+    #results = run_tco_scenario(scenario_inputs_ship_elec)       
+    # results = run_tco_scenario(scenario_inputs_ship_diesel)
+>>>>>>> 88247ecc4e065ec7b4d766931743f177b99faa38
     
     print("\n" + "#"*80)
     print("# TCO CALCULATION COMPLETED")
