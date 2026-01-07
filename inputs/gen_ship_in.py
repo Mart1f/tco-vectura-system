@@ -3,7 +3,7 @@ def make_example_ship_electric():
     Example dictionary for an ELECTRIC SHIP (vessel).
     Battery electric ship with shore power charging infrastructure.
 """
-    purchase_price = 3_500_000.0
+    purchase_price = 200_000_000.00
     operation_years = 15
     annual_dist = 50_000.0 # Nautical miles
     
@@ -49,7 +49,7 @@ def make_example_ship_electric():
             "consumption_energy": 54_164_540.0, # Total Annual kWh  
             "crew_count": 20, 
             "crew_monthly_total": 0, 
-            "maintenance_cost": 1_585_708.0, 
+            "maintenance_cost": 4_000_000, 
             "fuel_multiplier": 1.0,
             "EF_CO2_fuel": 0.0, # Zero direct emissions
             "ship_class": "ro_pax_large",
@@ -66,7 +66,7 @@ def make_example_ship_electric():
             "year_purchase": 2025,
             "current_year": 2040,  # 15 years later
             "travel_measure": 750_000.0,  # nautical miles
-            "maintenance_cost": 1_585_708.0, 
+            "maintenance_cost": 4_000_000, #2% purchase value
             "minimum_fuel_consumption": 500.0,  # kWh/nm
             "powertrain_model_year": 2025,
             "warranty": 7.0,
@@ -84,7 +84,7 @@ def make_example_ship_diesel():
     Refined dictionary for a DIESEL SHIP (vessel).
     Traditional diesel-powered cargo (ro_pax_medium) ship with CO2 tax considerations.
     """
-    purchase_price = 2_000_000.0
+    purchase_price = 90_000_000.00
     operation_years = 15
     annual_dist = 60_000.0
     
@@ -123,7 +123,7 @@ def make_example_ship_diesel():
             "annual_distance_travel": annual_dist,
             "crew_count": 15,
             "crew_monthly_total": 0, 
-            "maintenance_cost": 7_659_899, # Higher maintenance for internal combustion 15% of supposing total opex
+            "maintenance_cost": 2_700_000, #3% value purchase 
             "consumption_energy": 12_964_800.0, # supposing 74000 kwh per day by 0.04 euros per kwh
             "fuel_multiplier": 1.0,
             "EF_CO2_fuel": 2.65, # kg CO2 per liter
@@ -142,7 +142,7 @@ def make_example_ship_diesel():
             "year_purchase": 2025,
             "current_year": 2040,
             "travel_measure": 900_000.0,
-            "maintenance_cost": 7_659_899,
+            "maintenance_cost": 2_700_000, #3% value purchas
             "minimum_fuel_consumption": 800.0, #fix
             "powertrain_model_year": 2025,
             "warranty": 5.0,
