@@ -236,6 +236,7 @@ def run_rv(rv_inputs: dict) -> float:
     rv_sys.in_vehicle_properties.powertrain_model_year = rv_inputs["powertrain_model_year"]
     rv_sys.in_vehicle_properties.warranty = rv_inputs["warranty"]
     rv_sys.in_vehicle_properties.type_warranty = rv_inputs["type_warranty"]
+    rv_sys.in_vehicle_properties.maintenance_cost = rv_inputs["maintenance_cost"]
     
     print(f"Vehicle Type: {rv_inputs['type_vehicle']}")
     print(f"Energy Type: {rv_inputs['type_energy']}")

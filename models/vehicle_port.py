@@ -15,7 +15,7 @@ class VehiclePropertiesPort(Port):
         self.add_variable('registration_country', dtype=str, desc='Registration country of the vehicle', value='France')
         
         self.add_variable('travel_measure', dtype=float, desc='Total Distance (km) or hours (h)', value=0.0)
-        self.add_variable('maintenance_cost', dtype=float, desc='Total maintenance cost incurred', value=0.0)
+        self.add_variable('maintenance_cost', dtype=float, desc='Total maintenance cost incurred', value=1000.0)
         
         self.add_variable('minimum_fuel_consumption', dtype=float, desc='SFC (g/kWh)', value=250.0)
         self.add_variable('consumption_real', dtype=float, desc='Real consumption (kWh/km or kg/100km)', value=0.0)
