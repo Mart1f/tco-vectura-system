@@ -449,9 +449,15 @@ if __name__ == "__main__":
    
     # Run TCO calculation
     #results = run_tco_scenario(scenario_inputs_truck_elec)
+<<<<<<< HEAD
+    #results = run_tco_scenario(scenario_inputs_truck_diesel)
+    results = run_tco_scenario(scenario_inputs_ship_elec)       
+    #results = run_tco_scenario(scenario_inputs_ship_diesel)
+=======
     results = run_tco_scenario(scenario_inputs_truck_diesel)
     #results = run_tco_scenario(scenario_inputs_ship_elec)       
     # results = run_tco_scenario(scenario_inputs_ship_diesel)
+>>>>>>> 88247ecc4e065ec7b4d766931743f177b99faa38
     
     print("\n" + "#"*80)
     print("# TCO CALCULATION COMPLETED")
