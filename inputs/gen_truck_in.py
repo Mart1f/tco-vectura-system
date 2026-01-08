@@ -205,8 +205,8 @@ def make_example_truck_diesel():
             "maintenance_cost": 63600.0,
             "minimum_fuel_consumption": 195.0,
             "powertrain_model_year": 2020,
-            "warranty": 2.0,
-            "type_warranty": 'year',
+            "warranty": 2000000.0,
+            "type_warranty": 'km',
             "energy_price": 1.20,  # €/liter diesel
             "co2_taxes": 23670,
             "subsidies": 0.0,

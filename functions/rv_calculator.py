@@ -61,6 +61,19 @@ class ResidualValueCalculator(System):
         self.add_outward('dep_per_year', 0.0, desc='Depreciation per year')
         self.add_outward('dep_by_usage', 0.0, desc='Depreciation by usage')
         self.add_outward('dep_maintenance', 0.0, desc='Depreciation by maintenance')
+        self.add_outward('energy_price_factor', 0.0, desc='Energy price factor')
+        self.add_outward('cO2_taxes_factor', 0.0, desc='CO2 taxes factor')
+        self.add_outward('subsidies_factor', 0.0, desc='Subsidies factor')
+        self.add_outward('energy_price', 0.0, desc='Energy price')
+        self.add_outward('co2_taxes', 0.0, desc='CO2 taxes')
+        self.add_outward('subsidies', 0.0, desc='Subsidies')
+
+        # self.energy_price_factor
+        # self.cO2_taxes_factor
+        # self.subsidies_factor
+        # self.energy_price
+        # self.co2_taxes
+        # self.subsidies
 
 
     # COMPUTE METHODS FOR RV CALCULATION
@@ -250,7 +263,7 @@ class ResidualValueCalculator(System):
         
         # Compute IMPACT HEALTH
         self.total_impact_health = (self.efficiency_penalty+self.obsolescence_penalty+self.charging_penalty+self.warranty_penalty)
-        self.total_impact_health = self.total_impact_health*number_of_vehicles
+        self.total_impact_health = (self.total_impact_health*number_of_vehicles)/100.0
 
     # 3.- EXTERNAL FACTORS
     def compute_external_factors(self):
@@ -266,18 +279,18 @@ class ResidualValueCalculator(System):
 
 
         # Parameters of database
-        energy_price_factor = self._countries_data[country]["external_factors"]["energy_price_factor"][type_energy]
-        cO2_taxes_factor = self._countries_data[country]["external_factors"]["CO2_taxes_factor"]
-        subsidies_factor = self._countries_data[country]["external_factors"]["subsidies_factor"][type_energy]
+        self.energy_price_factor = self._countries_data[country]["external_factors"]["energy_price_factor"][type_energy]
+        self.cO2_taxes_factor = self._countries_data[country]["external_factors"]["CO2_taxes_factor"]
+        self.subsidies_factor = self._countries_data[country]["external_factors"]["subsidies_factor"][type_energy]
 
-        energy_price = self._countries_data[country]["energy"]["energy_price_c_e"][type_energy]
-        co2_taxes = self._countries_data[country]["tax_CO2_c_e"]
-        subsidies = self._countries_data[country]["subsidies"]["2025"]["medium"]["vehicle_subsidies"][type_energy]
+        self.energy_price = self._countries_data[country]["energy"]["energy_price_c_e"][type_energy]
+        self.co2_taxes = self._countries_data[country]["tax_CO2_c_e"]
+        self.subsidies = self._countries_data[country]["subsidies"]["2025"]["medium"]["vehicle_subsidies"][type_energy]
 
 
 
         # Total external_factors
-        self.total_external_factors = energy_price_factor*energy_price+ co2_taxes*cO2_taxes_factor + subsidies*subsidies_factor
+        self.total_external_factors = self.energy_price_factor*self.energy_price+ self.co2_taxes*self.cO2_taxes_factor + self.subsidies*self.subsidies_factor
         self.total_external_factors = self.total_external_factors*number_of_vehicles
 
     # 4.- RV
@@ -301,6 +314,10 @@ class ResidualValueCalculator(System):
             print(f"   ---- Warranty Penalty: {self.warranty_penalty:,.2f} %")
 
             print(f" - Total External Factors Adjustment: €{self.total_external_factors:,.2f}")
+            print(f" ---- Energy Price Factor: €{self.energy_price_factor:,.2f} x {self.energy_price:,.2f} €/kWh")
+            print(f" ---- CO2 Taxes Factor: €{self.cO2_taxes_factor:,.2f} x {self.co2_taxes:,.2f} €/kgCO2")
+            print(f" ---- Subsidies Factor: €{self.subsidies_factor:,.2f} x {self.subsidies:,.2f} €")
+            
             print()
         except Exception as e:
             print(f"ERROR in RV compute: {e}")
